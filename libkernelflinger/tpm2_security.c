@@ -197,6 +197,38 @@ static EFI_STATUS tpm2_get_cap_permanent(TPMA_PERMANENT *per)
 	return ret;
 }
 
+EFI_STATUS tpm2_get_cap_lockcounter()
+{
+	EFI_STATUS ret;
+	TPMI_YES_NO more_data;
+	TPMS_CAPABILITY_DATA cap_data;
+        UINT32  lockout_counter = 0;
+        TPML_TAGGED_TPM_PROPERTY *prop;
+
+	ret = tpm2_get_capability(TPM_CAP_TPM_PROPERTIES, TPM_PT_LOCKOUT_COUNTER, 1, &more_data, &cap_data);
+	if (EFI_ERROR(ret)) {
+		efi_perror(ret, L"Get TPM cap lock counter failed");
+		return ret;
+	}
+
+//	*LockoutCounter = SwapBytes32 (cap_data.data.tpmProperties.tpmProperty->value);
+        if (!EFI_ERROR(ret) && cap_data.data.tpmProperties.count > 0) {
+                lockout_counter = bswap_32(cap_data.data.tpmProperties.tpmProperty[0].value);
+                debug(L"[TT][BNK] DA Lockout Counter: %d", lockout_counter);
+        } else {
+                warning(L"[TT][BNK] Failed to get DA lockout counter: 0x%x", ret);
+        }
+
+	prop = &cap_data.data.tpmProperties;
+        if (bswap_32(prop->count) <= 0) {
+                error(L"Get empty TPM capability data of TPM_PT_PERMANENT");
+                ret = EFI_NOT_FOUND;
+                return ret;
+        }
+
+	return ret;
+}
+
 static EFI_STATUS tpm2_create_nvindex(TPMI_RH_NV_INDEX nv_index,
 				TPMA_NV attributes,
 				UINT32 data_size)
@@ -821,6 +853,10 @@ EFI_STATUS tpm2_init(void)
 	if (EFI_ERROR(ret))
 		return ret;
 
+	ret = tpm2_get_cap_lockcounter();
+	if (EFI_ERROR(ret))
+		return ret;
+
 	ret = tpm2_check_bootloader_index();
 	if (EFI_ERROR(ret))
 		return ret;
@@ -839,10 +875,12 @@ EFI_STATUS tpm2_init(void)
 
 EFI_STATUS tpm2_end(void)
 {
+	debug(L"[BNK][VRP] Android TPM - tpm2_end writelock nv index BL commented");
 	/* Maybe set read/write lock again */
 	tpm2_read_lock_nvindex(NV_INDEX_TRUSTYOS_SEED);
-	tpm2_read_lock_nvindex(NV_INDEX_BOOTLOADER);
-	tpm2_write_lock_nvindex(NV_INDEX_BOOTLOADER);
+	//tpm2_read_lock_nvindex(NV_INDEX_BOOTLOADER);
+	//tpm2_write_lock_nvindex(NV_INDEX_BOOTLOADER);
+        tpm2_get_cap_lockcounter();
 
 	return EFI_SUCCESS;
 }

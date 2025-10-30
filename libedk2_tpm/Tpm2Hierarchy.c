@@ -16,6 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Tpm2CommandLib.h>
 #include <Tpm2DeviceLib.h>
 #include <Tpm2Help.h>
+#include "efidebug.h"
 
 #pragma pack(1)
 

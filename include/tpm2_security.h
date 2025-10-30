@@ -84,4 +84,6 @@ EFI_STATUS tee_tpm2_delete_index(UINT32 index);
 EFI_STATUS tee_tpm2_fuse_lock_owner(void);
 EFI_STATUS tee_tpm2_fuse_provision_seed(void);
 
+EFI_STATUS tpm2_get_cap_lockcounter(void);
+
 #endif /* _TPM2_SECURITY_H_ */

@@ -19,6 +19,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <efi.h>
 #include <efilib.h>
 
+/*#ifdef ENABLE_TPM_VERBOSE
+#define Tpm2SubmitCommand  Tpm2SubmitCommandVerbose
+#endif
+*/
+
 /**
   This service enables the sending of commands to the TPM2.
 
@@ -107,5 +112,18 @@ EFIAPI
 Tpm2RegisterTpm2DeviceLib (
   IN TPM2_DEVICE_INTERFACE   *Tpm2Device
   );
+
+
+//#ifdef ENABLE_TPM_VERBOSE
+EFI_STATUS
+EFIAPI
+Tpm2SubmitCommandVerbose (
+    IN      UINT32  InputParameterBlockSize,
+    IN      UINT8  *InputParameterBlock,
+    IN OUT  UINT32 *OutputParameterBlockSize,
+    IN OUT  UINT8  *OutputParameterBlock
+);
+//#endif
+
 
 #endif
